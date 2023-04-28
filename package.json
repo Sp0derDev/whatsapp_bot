@@ -1,0 +1,20 @@
+{
+    "name": "whatsapp_bot_v2",
+    "version": "2.0.0",
+    "description": "A refactored version of spoods whatsapp bot",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Sp0derDev",
+    "license": "ISC",
+    "dependencies": {
+        "@ffmpeg-installer/ffmpeg": "^1.1.0",
+        "@open-wa/wa-automate": "^4.64.5",
+        "@open-wa/wa-automate-socket-client": "^3.2.0",
+        "fluent-ffmpeg": "^2.1.2",
+        "fs": "^0.0.1-security",
+        "moment-timezone": "^0.5.43",
+        "openai": "^3.2.1"
+    }
+}
