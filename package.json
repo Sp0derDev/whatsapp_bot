@@ -10,6 +10,11 @@
     },
     "author": "Sp0derDev",
     "license": "ISC",
+    "overrides": {
+        "@open-wa/wa-automate": {
+            "puppeteer": "latest"
+        }
+    },
     "dependencies": {
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
         "@open-wa/wa-automate": "^4.64.5",
@@ -17,6 +22,7 @@
         "fluent-ffmpeg": "^2.1.2",
         "fs": "^0.0.1-security",
         "moment-timezone": "^0.5.43",
-        "openai": "^3.2.1"
+        "openai": "^3.2.1",
+        "puppeteer": "^19.11.1"
     }
 }
