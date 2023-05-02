@@ -69,7 +69,7 @@ const proc = async (client, message) => {
                 }
             } catch (error) {
                 console.error(error);
-                client.reply(
+                await client.reply(
                     from,
                     "An unknown error occurred while executing the command.",
                     id
@@ -77,7 +77,7 @@ const proc = async (client, message) => {
             }
         } else {
             console.log(`Command Not Found [ ${commandName} ]`);
-            client.reply(
+            await client.reply(
                 from,
                 "Unknown command. Type `!help` for a list of available commands.",
                 id
@@ -90,15 +90,15 @@ const proc = async (client, message) => {
     return true;
 };
 
-// Add Message to Queue
-const processMessage = (client, message) =>
-    queue.add(() => proc(client, message));
-
 async function start() {
     const client = await SocketClient.connect(
         "http://localhost:8899",
         "aMYOlCfZpM7HmDla0l5CjnFXdYftsS2H"
     );
+
+    // Add Message to Queue
+    const processMessage = (message) =>
+    queue.add(() => proc(client, message));
 
     const socketId = client.socket.id;
     console.log(
@@ -110,13 +110,8 @@ async function start() {
     // const unreadMessages = await client.getAllUnreadMessages();
     // unreadMessages.forEach((message) => processMessage(client, message));
 
-    await client.onMessage(async (message) => {
-        console.log(message)
-        return await proc(client, message)
-
-    });
+    await client.onMessage(processMessage);
     queue.start();
-
 }
 
 start().catch((e) => console.log("Error", e.message));
