@@ -53,7 +53,6 @@ const proc = async(client, message) => {
         "";
 
     // console.log(`Proccessing Message From ${from} - ${pushname}`)
-    await client.sendSeen(from);
     if (body.startsWith(prefix)) {
         // Split the command and arguments
         const args = body.slice(prefix.length).trim().split(/ +/);
