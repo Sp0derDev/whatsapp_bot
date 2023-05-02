@@ -15,9 +15,9 @@ exports.default = () => {
         "logConsoleErrors": true,
         "licenseKey": "6106AABF-7E1E4631-BB6F5D01-F4ED8C6F",
         // "tunnel": true,
-		//"useChrome": true,
+		"useChrome": true,
 		"headful": true,
         "key": "aMYOlCfZpM7HmDla0l5CjnFXdYftsS2H",
-        "emitUnread" : true
+        // "emitUnread" : true
     }
 }
