@@ -24,7 +24,7 @@ const queue = new PQueue({
 });
 
 // Proccess The Messages in The Queue
-const proc = async(client, message) => {
+const proc = async (client, message) => {
     // Extract Attributes from message
     const {
         type,
@@ -46,11 +46,11 @@ const proc = async(client, message) => {
     const { prefix } = config;
     body =
         type === "chat" && body.startsWith(prefix) ?
-        body :
-        ((type === "image" && caption) || (type === "video" && caption)) &&
-        caption.startsWith(prefix) ?
-        caption :
-        "";
+            body :
+            ((type === "image" && caption) || (type === "video" && caption)) &&
+                caption.startsWith(prefix) ?
+                caption :
+                "";
 
     // console.log(`Proccessing Message From ${from} - ${pushname}`)
     if (body.startsWith(prefix)) {
@@ -110,10 +110,10 @@ async function start() {
     // const unreadMessages = await client.getAllUnreadMessages();
     // unreadMessages.forEach((message) => processMessage(client, message));
 
-    await client.onMessage(async(message) => {
+    await client.onMessage(async (message) => {
         console.log(message)
         return await proc(client, message)
-        
+
     });
     queue.start();
 
@@ -150,17 +150,17 @@ async function preChecks(client, message, command) {
     // Get Command Permissions
     const isCommandGroupOnly =
         command.groupOnly == undefined || command.groupOnly == null ?
-        false :
-        command.groupOnly;
+            false :
+            command.groupOnly;
     const isCommandMustAdmin =
         command.mustBeAdmin == undefined || command.mustBeAdmin == null ?
-        false :
-        command.mustBeAdmin;
+            false :
+            command.mustBeAdmin;
 
     // Get the roles allowed to use this command
     const allowedRoles =
         command.roles == undefined || command.roles == null ? ["all"] :
-        command.roles;
+            command.roles;
     // console.log("Allowed Roles:", allowedRoles)
     // console.log("Current Sender Roles:", currentRoles)
 
@@ -232,9 +232,9 @@ async function checkRegexFilter(client, message, groupSettingsclient, body) {
                 client.sendTextWithMentions(
                     from,
                     `@${sender.id.replace(
-            /@c.us/g,
-            ""
-          )} You Have Exceeded The Maximum Number Of Warnings. 🔴\n\nKicking.. 🧨`
+                        /@c.us/g,
+                        ""
+                    )} You Have Exceeded The Maximum Number Of Warnings. 🔴\n\nKicking.. 🧨`
                 );
                 if (!isBotGroupAdmins)
                     return client.reply(
