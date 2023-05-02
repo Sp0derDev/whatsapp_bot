@@ -4,6 +4,8 @@
     "description": "A refactored version of spoods whatsapp bot",
     "main": "index.js",
     "scripts": {
+        "server": "npx @open-wa/wa-automate",
+        "client": "node index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Sp0derDev",
