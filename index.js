@@ -85,6 +85,7 @@ const proc = async (client, message) => {
         }
     } else {
         // console.log(`Not a Command. Skipping..`)
+        await client.sendSeen(chatId);
     }
 
     return true;
