@@ -34,6 +34,48 @@ module.exports = {
 
 
         },
+    checkFlights: async(client)=>{
+        const flightsJson = JSON.parse(fs.readFileSync(`${__dirname}/flights.json`))
+
+        // console.log(flightsJson)
+        for (var flightNumber in flightsJson) {
+            if (flightsJson[flightNumber].flightStatus.toUpperCase().includes("LANDED")) {
+                console.log("Skipping " + flightNumber + "...")
+                continue
+            }
+    
+            const oldDetails = flightsJson[flightNumber]
+    
+            const flightIdResponse = await getFlightId(flightNumber)
+    
+            if (!flightIdResponse.success) {
+                console.log("Failed To Fetch Flight Id")
+                continue 
+            }
+    
+            const flightDetailsResponse = await getFlightDetails(flightIdResponse.flightId,true,oldDetails.numbers)
+    
+    
+    
+            if (!flightDetailsResponse.success) {
+                console.log("Failed To Fetch Flight Details")
+                    // Send Error
+                continue
+            }
+            const newDetails = flightDetailsResponse.flightDetails
+            if (newDetails.departureTime != oldDetails.departureTime || newDetails.estimatedArrival != oldDetails.estimatedArrival || newDetails.flightStatus != oldDetails.flightStatus) {
+                let updateText = `🚨 FLIGHT UPDATE DETECTED 🚨\n\n✈️ Flight No.: ${newDetails.flightNumber}\n🌎 Route: ${newDetails.departureAirport} -> ${newDetails.arrivalAirport}\n🛫 Departure: ${newDetails.departureTime}\n⏰ Scheduled Arrival: ${newDetails.scheduledArrival}\n⌚️ Estimated Arrival: ${newDetails.estimatedArrival}\n📡 Status: ${newDetails.flightStatus.toUpperCase()}`
+    
+                for (var i = 0; i < newDetails.numbers.length; i++) {
+                    await client.sendText(newDetails.numbers[i], updateText)
+                }
+    
+            }
+    
+    
+    
+        }
+    },
 };
 
 async function getFlightId(flightNumber) {
@@ -122,7 +164,6 @@ async function getFlightDetails(flightId, writeToFile, numbers) {
 
     return { success, apiResponseMessage, flightDetails };
 }
-
 function convertTimestamp(timestamp) {
     const date = new Date(timestamp * 1000);
     const month = ('0' + (date.getMonth() + 1)).slice(-2);
@@ -133,4 +174,6 @@ function convertTimestamp(timestamp) {
     const formattedTime = `${hours}:${minutes} - ${day}/${month}`;
     return formattedTime;
   }
+
+
   

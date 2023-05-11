@@ -30,15 +30,10 @@ const proc = async (client, message) => {
         type,
         id,
         from,
-        t,
         sender,
-        isGroupMsg,
-        chat,
         chatId,
         caption,
-        isMedia,
-        quotedMsg,
-        quotedMsgObj,
+     
     } = message;
     let { body } = message;
     let { pushname, verifiedName, formattedName } = sender ? sender : "null";
@@ -107,6 +102,12 @@ async function start() {
         socketId
     );
 
+    // Start flight reminder
+    setInterval(async function() {
+        console.log("Checking Flights..")
+        await commands["flight"].checkFlights(client)
+    }, 120 * 1000);
+
     // Get a list of unread messages to proccess messages sent during downtime
     // const unreadMessages = await client.getAllUnreadMessages();
     // unreadMessages.forEach((message) => processMessage(client, message));
@@ -116,20 +117,7 @@ async function start() {
 }
 
 start().catch((e) => console.log("Error", e.message));
-// create({
-//         headless: true,
-//         autoRefresh: true,
-//         sessionId: "Ahmed",
-//         eventMode: true,
-//         // logging: [{ "type": "console" }],
-//         // debug: true,
-//         // logConsoleErrors: true,
-//         licenseKey: "6106AABF-7E1E4631-BB6F5D01-F4ED8C6F",
-//         disableSpins: true,
-//         useChrome: true,
-//         callTimeout: 300 * 1000,
-//     })
-//     .then((client) => start(client));
+
 
 async function preChecks(client, message, command) {
     // Set up a few flags
