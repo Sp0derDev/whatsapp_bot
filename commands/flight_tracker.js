@@ -1,6 +1,8 @@
-
 const axios = require('axios');
 const fs = require('fs');
+
+// Path to the flight data JSON file
+const flightsJsonPath = `${__dirname}/flights.json`;
 
 module.exports = {
     name: 'track',
@@ -8,66 +10,91 @@ module.exports = {
     description: 'Tracks Flights And Sends Updates.',
     roles: ['modeer'],
     execute: async(client, message, args) => {
+
+        // Check if any flight number is given
         if(args.length <= 0) return await client.reply(message.from,"You must specify a flight number.",message.id)
+        
+        // Parse flight number to uppercase
         let flightNumber = args[0].toUpperCase()
-        const flightsJson = JSON.parse(fs.readFileSync(`${__dirname}/flights.json`))
+
+        // Load the existing flight data from JSON file
+        const flightsJson = JSON.parse(fs.readFileSync(flightsJsonPath))
+
+        // Prepare an array to store phone numbers of those who want to track the flight
         let oldNumbers = []
+
+        // If the flight is already being tracked, add the phone number to the list
         if (flightNumber in flightsJson) {
             console.log("Flight Already Being Tracked! Adding Phone Number To List..")
             oldNumbers = flightsJson[flightNumber].numbers
         }
+
+        // If the user's phone number is not in the stored list, add it
         if (!(oldNumbers.includes(message.from))) oldNumbers.push(message.from)
+
+        // Fetch flight id using flight number (Used by the flightradar24 api)
         const flightIdResponse = await getFlightId(flightNumber)
 
+        // If the flight id could not be fetched, return an error message
         if (!flightIdResponse.success) {
-            console.log("Failed To Fetch Flight Details")
+            console.log("Failed To Fetch Flight Id")
             return await client.reply(message.from, flightIdResponse.apiResponseMessage, message.id)
         }
 
+        // Fetch flight details using flight id
         const flightDetailsResponse = await getFlightDetails(flightIdResponse.flightId,true,oldNumbers)
 
-
+        // Prepare the flight tracking message
         const newDetails = flightDetailsResponse.flightDetails
         let replyText =  `🚨 TRACKING FLIGHT 🚨\n\n✈️ Flight No.: ${newDetails.flightNumber}\n🌎 Route: ${newDetails.departureAirport} -> ${newDetails.arrivalAirport}\n🛫 Departure: ${newDetails.departureTime}\n⏰ Scheduled Arrival: ${newDetails.scheduledArrival}\n🛬 Estimated Arrival: ${newDetails.estimatedArrival}\n📡 Status: ${newDetails.flightStatus}`
-        console.log(replyText)
+        // Print message for debugging purposes
+        console.log(replyText) 
         await client.reply(message.from,replyText, message.id)
-
-
         },
-    checkFlights: async(client)=>{
-        const flightsJson = JSON.parse(fs.readFileSync(`${__dirname}/flights.json`))
 
-        // console.log(flightsJson)
-        for (var flightNumber in flightsJson) {
+    checkFlights: async(client)=>{
+
+        // Load the existing flights data from JSON file
+        const flightsJson = JSON.parse(fs.readFileSync(flightsJsonPath))
+
+        // Check each flight in the flight data
+        for (let flightNumber in flightsJson) {
+            // If the flight has already landed, skip it
             if (flightsJson[flightNumber].flightStatus.toUpperCase().includes("LANDED")) {
-                console.log("Skipping " + flightNumber + "...")
+                console.log("Skipping " + flightNumber + "...") // Debugging
                 continue
             }
     
+            // Store the old flight details to compare them later
             const oldDetails = flightsJson[flightNumber]
     
+            // Fetch flight id using flight number
             const flightIdResponse = await getFlightId(flightNumber)
     
+            // If the flight id could not be fetched, skip to the next flight
             if (!flightIdResponse.success) {
                 console.log("Failed To Fetch Flight Id")
                 continue 
             }
     
+            // Fetch the new flight details using flight id
             const flightDetailsResponse = await getFlightDetails(flightIdResponse.flightId,true,oldDetails.numbers)
     
-    
-    
+            // If the flight details could not be fetched, skip to the next flight
             if (!flightDetailsResponse.success) {
                 console.log("Failed To Fetch Flight Details")
-                    // Send Error
                 continue
             }
+
+            // Check if any flight details have changed
             const newDetails = flightDetailsResponse.flightDetails
             if (newDetails.departureTime != oldDetails.departureTime || newDetails.estimatedArrival != oldDetails.estimatedArrival || newDetails.flightStatus != oldDetails.flightStatus) {
+                // Prepare the flight update message
                 let updateText = `🚨 FLIGHT UPDATE DETECTED 🚨\n\n✈️ Flight No.: ${newDetails.flightNumber}\n🌎 Route: ${newDetails.departureAirport} -> ${newDetails.arrivalAirport}\n🛫 Departure: ${newDetails.departureTime}\n⏰ Scheduled Arrival: ${newDetails.scheduledArrival}\n⌚️ Estimated Arrival: ${newDetails.estimatedArrival}\n📡 Status: ${newDetails.flightStatus}`
-    
-                for (var i = 0; i < newDetails.numbers.length; i++) {
-                    await client.sendText(newDetails.numbers[i], updateText)
+                
+                // Send the flight update message to each phone number in the list
+                for (let number of newDetails.numbers) {
+                    await client.sendText(number, updateText);
                 }
     
             }
@@ -78,6 +105,7 @@ module.exports = {
     },
 };
 
+// Function to fetch flight id using flight number
 async function getFlightId(flightNumber) {
     let apiResponseMessage;
     let flightId;
@@ -153,7 +181,7 @@ async function getFlightDetails(flightId, writeToFile, numbers) {
 
     if (writeToFile && success) {
         try {
-            const flightsJson = JSON.parse(fs.readFileSync(`${__dirname}/flights.json`))
+            const flightsJson = JSON.parse(fs.readFileSync(flightsJsonPath))
             flightsJson[flightDetails.flightNumber] = flightDetails
             fs.writeFileSync(`${__dirname}/flights.json`, JSON.stringify(flightsJson));
         } catch (err) {
