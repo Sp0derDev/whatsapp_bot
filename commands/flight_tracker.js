@@ -28,7 +28,7 @@ module.exports = {
 
 
         const newDetails = flightDetailsResponse.flightDetails
-        let replyText =  `🚨 TRACKING FLIGHT 🚨\n\n✈️ Flight No.: ${newDetails.flightNumber}\n🌎 Route: ${newDetails.departureAirport} -> ${newDetails.arrivalAirport}\n🛫 Departure: ${newDetails.departureTime}\n⏰ Scheduled Arrival: ${newDetails.scheduledArrival}\n🛬 Estimated Arrival: ${newDetails.estimatedArrival}\n📡 Status: ${newDetails.flightStatus.toUpperCase()}`
+        let replyText =  `🚨 TRACKING FLIGHT 🚨\n\n✈️ Flight No.: ${newDetails.flightNumber}\n🌎 Route: ${newDetails.departureAirport} -> ${newDetails.arrivalAirport}\n🛫 Departure: ${newDetails.departureTime}\n⏰ Scheduled Arrival: ${newDetails.scheduledArrival}\n🛬 Estimated Arrival: ${newDetails.estimatedArrival}\n📡 Status: ${newDetails.flightStatus}`
         console.log(replyText)
         await client.reply(message.from,replyText, message.id)
 
@@ -64,7 +64,7 @@ module.exports = {
             }
             const newDetails = flightDetailsResponse.flightDetails
             if (newDetails.departureTime != oldDetails.departureTime || newDetails.estimatedArrival != oldDetails.estimatedArrival || newDetails.flightStatus != oldDetails.flightStatus) {
-                let updateText = `🚨 FLIGHT UPDATE DETECTED 🚨\n\n✈️ Flight No.: ${newDetails.flightNumber}\n🌎 Route: ${newDetails.departureAirport} -> ${newDetails.arrivalAirport}\n🛫 Departure: ${newDetails.departureTime}\n⏰ Scheduled Arrival: ${newDetails.scheduledArrival}\n⌚️ Estimated Arrival: ${newDetails.estimatedArrival}\n📡 Status: ${newDetails.flightStatus.toUpperCase()}`
+                let updateText = `🚨 FLIGHT UPDATE DETECTED 🚨\n\n✈️ Flight No.: ${newDetails.flightNumber}\n🌎 Route: ${newDetails.departureAirport} -> ${newDetails.arrivalAirport}\n🛫 Departure: ${newDetails.departureTime}\n⏰ Scheduled Arrival: ${newDetails.scheduledArrival}\n⌚️ Estimated Arrival: ${newDetails.estimatedArrival}\n📡 Status: ${newDetails.flightStatus}`
     
                 for (var i = 0; i < newDetails.numbers.length; i++) {
                     await client.sendText(newDetails.numbers[i], updateText)
@@ -137,9 +137,10 @@ async function getFlightDetails(flightId, writeToFile, numbers) {
             flightDetails.departureTime = convertTimestamp(flightDetails.departureTime)
             flightDetails.scheduledArrival = convertTimestamp(flightDetails.scheduledArrival)
             flightDetails.estimatedArrival = convertTimestamp(flightDetails.estimatedArrival)
-
+            const altitude = flight.trail[0].alt
+            const lastTrailTs = flight.trail[0].ts
             flightDetails.flightStatus = flight.time.real.arrival != null? `Landed at ${flightDetails.estimatedArrival}`: flightDetails.flightMessage
-
+            if (altitude < 50 && !flightDetails.flightStatus.toUpperCase().includes("LANDED")) flightDetails.flightStatus = `Landed based on low altitude: ${altitude}ft at ${convertTimestamp(lastTrailTs)}` 
             return
         })
         .catch((error) => {
