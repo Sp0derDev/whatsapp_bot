@@ -25,6 +25,13 @@ const queue = new PQueue({
 
 // Proccess The Messages in The Queue
 const proc = async (client, message) => {
+    client.getAmountOfLoadedMessages()
+                    .then((msg) => {
+                        if (msg >= 50) {
+                            console.log('Cuting message cache..')
+                            client.cutMsgCache()
+                        }
+                    })
     // Extract Attributes from message
     const {
         type,
@@ -111,6 +118,12 @@ async function start() {
     // Get a list of unread messages to proccess messages sent during downtime
     // const unreadMessages = await client.getAllUnreadMessages();
     // unreadMessages.forEach((message) => processMessage(client, message));
+
+    client.onStateChanged((state) => {
+        console.log('State Changed:', state)
+        if (state === 'CONFLICT' || state === 'UNLAUNCHED') client.forceRefocus()
+    })
+
 
     await client.onMessage(processMessage);
     queue.start();
